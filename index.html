@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+          .content-auto {
+            content-visibility: auto;
+          }
+        }
+      </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+</head>
+
+<body>
+    <div class="flex justify-center">
+        <div
+            class="card  min-w-sm max-w-sm border border-gray-100 bg-gray-50   transition-shadow test  shadow-lg hover:shadow-shadow-xl w-full bg-green-600 text-purple-50 rounded-md">
+            <div class="flex p-4 justify-between">
+                <input id="input_text"
+                    class=" bg-green-300 rounded text-white placeholder:text-white p-2 focus:outline-none"
+                    placeholder="Please Enter a City Name" />
+                <span id="search_button"
+                    class="cursor-pointer content-center items-center text-2xl font-extrabold bg-green-300 rounded px-4"><i
+                        class="fas fa-search"></i></span>
+            </div>
+            <!-- Error message container -->
+            <p id="error_message" class="px-5 text-red-600 text-sm"></p>
+
+            <h2 class="text-md mb-2 px-4 pt-4">
+                <div class="flex justify-between">
+                    <div class="badge relative top-0">
+                        <span
+                            class="mt-2 py-1 h-12px text-md font-semibold w-12px  rounded right-1 bottom-1 px-4">Laghouat</span>
+                    </div>
+                    <span class="text-lg font-bold ">6:13</span>
+                </div>
+            </h2>
+
+            <div class="flex justify-center items-center p-4">
+                <div id="icon" class="flex justify-center items-center w-40">
+                    <img id="image" src="./images/rain.png" />
+                </div>
+            </div>
+            <div class="text-md pt-4 pb-4 px-4">
+                <div class="flex justify-between items-center">
+                    <div class="space-y-2">
+                        <span class="flex space-x-2 items-center"><svg height="20" width="20" viewBox="0 0 32 32"
+                                class="fill-current">
+                                <path d="M13,30a5.0057,5.0057,0,0,1-5-5h2a3,3,0,1,0,3-3H4V20h9a5,5,0,0,1,0,10Z"></path>
+                                <path
+                                    d="M25 25a5.0057 5.0057 0 01-5-5h2a3 3 0 103-3H2V15H25a5 5 0 010 10zM21 12H6V10H21a3 3 0 10-3-3H16a5 5 0 115 5z">
+                                </path>
+                            </svg> <span id="wind">27km/h</span></span><span class="flex space-x-2 items-center"><svg
+                                height="20" width="20" viewBox="0 0 32 32" class="fill-current">
+                                <path d="M16,24V22a3.2965,3.2965,0,0,0,3-3h2A5.2668,5.2668,0,0,1,16,24Z"></path>
+                                <path
+                                    d="M16,28a9.0114,9.0114,0,0,1-9-9,9.9843,9.9843,0,0,1,1.4941-4.9554L15.1528,3.4367a1.04,1.04,0,0,1,1.6944,0l6.6289,10.5564A10.0633,10.0633,0,0,1,25,19,9.0114,9.0114,0,0,1,16,28ZM16,5.8483l-5.7817,9.2079A7.9771,7.9771,0,0,0,9,19a7,7,0,0,0,14,0,8.0615,8.0615,0,0,0-1.248-3.9953Z">
+                                </path>
+                            </svg> <span id="humidity">32%</span></span>
+                    </div>
+                    <div>
+                        <h1 id="current_temp" class="text-6xl"> 0°C </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const apiKey = "b860d8eb19d5c42dfec96e8e0ee2bf76";
+        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?&units=metric";
+        const input = document.getElementById("input_text");
+        const temp = document.getElementById("current_temp");
+        const wind = document.getElementById("wind");
+        const humidity = document.getElementById("humidity");
+        const image = document.getElementById("image");
+        const errorMessage = document.getElementById("error_message");
+        input.addEventListener('focus', () => {
+            errorMessage.textContent = "";
+        });
+        document.getElementById('search_button').addEventListener('click', () => {
+            const inputValue = input.value;
+            if (inputValue.length >= 3) {
+                errorMessage.textContent = "";
+                checkWeather(inputValue);
+                errorMessage.textContent = ""
+            } else {
+                errorMessage.textContent = "Search terms must contain at least 3 characters";
+            }
+
+        });
+        const checkWeather = async (city) => {
+            errorMessage.textContent = "";
+            const response = await fetch(`${apiUrl}&q=${city}&appid=${apiKey}`);
+            if (response.ok) {
+                const data = await response.json();
+                temp.textContent = Math.round(data.main.temp) + "°C"
+                wind.textContent = data.wind.speed + " km/h";
+                humidity.textContent = data.main.humidity + "%";
+                if (data.weather[0].main == "Clouds") {
+                    image.src = "images/clouds.png"
+                } else if (data.weather[0].main == "Clear") {
+                    image.src = "images/clear.png"
+                } else if (data.weather[0].main == "Rain") {
+                    image.src = "images/rain.png"
+                } else if (data.weather[0].main == "Drizzle") {
+                    image.src = "images/drizzle.png"
+                } else if (data.weather[0].main == "Mist") {
+                    image.src = "images/mist.png"
+                }
+            } else {
+                const data = await response.json();
+                errorMessage.textContent = data?.message
+            }
+        }
+    </script>
+</body>
+
+</html>
